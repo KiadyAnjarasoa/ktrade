@@ -7,12 +7,10 @@ workflows:
       flutter: stable
       xcode: latest
     scripts:
-      - name: Get Flutter packages
+      - name: Get Flutter packages and create iOS files
         script: |
           flutter pub get
-      - name: Install CocoaPods
-        script: |
-          cd ios && pod install
+          flutter create . --platforms=ios
       - name: Build iOS App (.ipa)
         script: |
           flutter build ipa --release --no-codesign
