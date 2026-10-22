@@ -11,8 +11,14 @@ workflows:
         script: |
           flutter pub get
           flutter create . --platforms=ios
-      - name: Build iOS App (.ipa)
+      - name: Build iOS App (.app)
         script: |
-          flutter build ipa --release --no-codesign
+          flutter build ios --release --no-codesign
+      - name: Create runner.app payload and zip
+        script: |
+          cd build/ios/iphoneos
+          mkdir Payload
+          mv Runner.app Payload/
+          zip -r KTrade.ipa Payload
     artifacts:
-      - build/ios/ipa/*.ipa
+      - build/ios/iphoneos/*.ipa
