@@ -1,7 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../app/theme.dart';
-import '../../core/services/ai_chart_service.dart';
+import 'package:ktrade/core/Services/ai_chart_service.dart';
 
 class RealtimeAiScreen extends StatefulWidget {
   const RealtimeAiScreen({super.key});
@@ -12,9 +13,14 @@ class RealtimeAiScreen extends StatefulWidget {
 
 class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
   final AiChartService _aiService = AiChartService();
+  StreamSubscription<double>? _streamSubscription;
+
   final List<FlSpot> _spots = [];
   final List<double> _priceHistory = [];
   double _xValue = 0;
+
+  String _selectedSymbol = 'EURUSD';
+  String _selectedTimeframe = '15mn';
 
   bool _isAnalyzing = false;
   Map<String, dynamic>? _aiAnalysis;
@@ -22,18 +28,24 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
   @override
   void initState() {
     super.initState();
-    _listenToMarket();
+    _startMarketStream();
   }
 
-  void _listenToMarket() {
-    _aiService.priceStream.listen((price) {
+  void _startMarketStream() {
+    _streamSubscription?.cancel();
+    _spots.clear();
+    _priceHistory.clear();
+    _xValue = 0;
+
+    _streamSubscription = _aiService
+        .getPriceStream(_selectedSymbol)
+        .listen((price) {
       if (!mounted) return;
       setState(() {
         _xValue += 1;
         _spots.add(FlSpot(_xValue, price));
         _priceHistory.add(price);
 
-        // Mitazona teboka 30 farany ihany mba tsy hahacharge be ny memoria
         if (_spots.length > 30) {
           _spots.removeAt(0);
         }
@@ -44,7 +56,8 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
   Future<void> _runAiAnalysis() async {
     setState(() => _isAnalyzing = true);
     final result = await _aiService.analyzeMarketWithAi(
-      symbol: 'XAUUSD',
+      symbol: _selectedSymbol,
+      timeframe: _selectedTimeframe,
       priceHistory: _priceHistory,
     );
     if (mounted) {
@@ -56,9 +69,18 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
   }
 
   @override
+  void dispose() {
+    _streamSubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    double currentPrice =
-        _priceHistory.isNotEmpty ? _priceHistory.last : 2650.0;
+    double currentPrice = _priceHistory.isNotEmpty
+        ? _priceHistory.last
+        : (_selectedSymbol == 'XAUUSD' ? 2650.0 : 1.0850);
+
+    int decimals = _selectedSymbol == 'XAUUSD' ? 2 : 5;
 
     return Scaffold(
       appBar: AppBar(
@@ -76,7 +98,79 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Live Price Card
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: KTradeTheme.cardBackground,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFF222832)),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _selectedSymbol,
+                        dropdownColor: KTradeTheme.cardBackground,
+                        isExpanded: true,
+                        items: const [
+                          DropdownMenuItem(
+                              value: 'EURUSD', child: Text('EUR/USD')),
+                          DropdownMenuItem(
+                              value: 'GBPUSD', child: Text('GBP/USD')),
+                          DropdownMenuItem(
+                              value: 'XAUUSD', child: Text('XAU/USD (Gold)')),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() {
+                              _selectedSymbol = val;
+                              _aiAnalysis = null;
+                            });
+                            _startMarketStream();
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                ChoiceChip(
+                  label: const Text('15mn'),
+                  selected: _selectedTimeframe == '15mn',
+                  selectedColor: KTradeTheme.primaryGreen,
+                  labelStyle: TextStyle(
+                    color: _selectedTimeframe == '15mn'
+                        ? Colors.black
+                        : Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  onSelected: (selected) {
+                    if (selected) {
+                      setState(() => _selectedTimeframe = '15mn');
+                    }
+                  },
+                ),
+                const SizedBox(width: 8),
+                ChoiceChip(
+                  label: const Text('1h'),
+                  selected: _selectedTimeframe == '1h',
+                  selectedColor: KTradeTheme.primaryGreen,
+                  labelStyle: TextStyle(
+                    color: _selectedTimeframe == '1h'
+                        ? Colors.black
+                        : Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  onSelected: (selected) {
+                    if (selected) {
+                      setState(() => _selectedTimeframe = '1h');
+                    }
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             Card(
               color: KTradeTheme.cardBackground,
               shape: RoundedRectangleBorder(
@@ -89,12 +183,12 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('XAU/USD (Live)',
-                            style: TextStyle(
+                        Text('$_selectedSymbol ($_selectedTimeframe Live)',
+                            style: const TextStyle(
                                 color: KTradeTheme.textMuted, fontSize: 14)),
                         const SizedBox(height: 4),
                         Text(
-                          '\$${currentPrice.toStringAsFixed(2)}',
+                          '\$${currentPrice.toStringAsFixed(decimals)}',
                           style: const TextStyle(
                               fontSize: 26,
                               fontWeight: FontWeight.bold,
@@ -127,10 +221,9 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Realtime FlChart
-            const Text('Graphique en temps réel',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('Graphique en temps réel ($_selectedTimeframe)',
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             Container(
               height: 220,
@@ -165,8 +258,6 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
                     ),
             ),
             const SizedBox(height: 24),
-
-            // AI Decision Section
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -181,7 +272,7 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
                 icon: const Icon(Icons.auto_awesome),
                 label: Text(
                   _isAnalyzing
-                      ? 'Analyse en cours par l\'IA...'
+                      ? 'Analyse en cours ($_selectedTimeframe)...'
                       : 'Demander l\'Avis de l\'IA 🧠',
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 16),
@@ -189,7 +280,6 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
             if (_aiAnalysis != null) ...[
               Card(
                 color: KTradeTheme.cardBackground,
@@ -230,13 +320,13 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'SL Suggeré: \$${_aiAnalysis!['suggestedSL'].toStringAsFixed(2)}',
+                            'SL Suggeré: \$${_aiAnalysis!['suggestedSL'].toStringAsFixed(decimals)}',
                             style: const TextStyle(
                                 color: KTradeTheme.lossRed,
                                 fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            'TP Suggeré: \$${_aiAnalysis!['suggestedTP'].toStringAsFixed(2)}',
+                            'TP Suggeré: \$${_aiAnalysis!['suggestedTP'].toStringAsFixed(decimals)}',
                             style: const TextStyle(
                                 color: KTradeTheme.primaryGreen,
                                 fontWeight: FontWeight.bold),
