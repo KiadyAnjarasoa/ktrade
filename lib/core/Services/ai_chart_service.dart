@@ -22,7 +22,7 @@ class AiChartService {
     required String symbol,
     required List<double> priceHistory,
   }) async {
-    // simulation d'appel API IA (ex: OpenAI / DeepSeek / Claude)
+    // Simulation d'appel API IA (ex: OpenAI / DeepSeek / Claude)
     await Future.delayed(const Duration(milliseconds: 1200));
 
     if (priceHistory.length < 5) {

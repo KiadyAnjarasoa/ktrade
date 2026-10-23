@@ -3,6 +3,7 @@ import '../features/dashboard/dashboard_screen.dart';
 import '../features/journal/journal_screen.dart';
 import '../features/calculator/calculator_screen.dart';
 import '../features/analytics/analytics_screen.dart';
+import '../features/analytics/realtime_ai_screen.dart';
 import '../features/settings/settings_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -20,6 +21,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     JournalScreen(),
     CalculatorScreen(),
     AnalyticsScreen(),
+    RealtimeAiScreen(), // <-- Ilay takelaka Graphe & IA!
     SettingsScreen(),
   ];
 
@@ -57,6 +59,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             icon: Icon(Icons.analytics_outlined),
             activeIcon: Icon(Icons.analytics),
             label: 'Analyse',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.auto_awesome_outlined),
+            activeIcon: Icon(Icons.auto_awesome),
+            label: 'Live AI 🤖',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),

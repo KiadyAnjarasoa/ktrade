@@ -15,7 +15,7 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
   final List<FlSpot> _spots = [];
   final List<double> _priceHistory = [];
   double _xValue = 0;
-  
+
   bool _isAnalyzing = false;
   Map<String, dynamic>? _aiAnalysis;
 
@@ -57,7 +57,8 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double currentPrice = _priceHistory.isNotEmpty ? _priceHistory.last : 2650.0;
+    double currentPrice =
+        _priceHistory.isNotEmpty ? _priceHistory.last : 2650.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -78,7 +79,8 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
             // Live Price Card
             Card(
               color: KTradeTheme.cardBackground,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
@@ -87,16 +89,22 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('XAU/USD (Live)', style: TextStyle(color: KTradeTheme.textMuted, fontSize: 14)),
+                        const Text('XAU/USD (Live)',
+                            style: TextStyle(
+                                color: KTradeTheme.textMuted, fontSize: 14)),
                         const SizedBox(height: 4),
                         Text(
                           '\$${currentPrice.toStringAsFixed(2)}',
-                          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+                          style: const TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
                         ),
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: KTradeTheme.primaryGreen.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(20),
@@ -104,9 +112,13 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
                       ),
                       child: const Row(
                         children: [
-                          Icon(Icons.fiber_manual_record, color: KTradeTheme.primaryGreen, size: 12),
+                          Icon(Icons.fiber_manual_record,
+                              color: KTradeTheme.primaryGreen, size: 12),
                           SizedBox(width: 6),
-                          Text('LIVE', style: TextStyle(color: KTradeTheme.primaryGreen, fontWeight: FontWeight.bold)),
+                          Text('LIVE',
+                              style: TextStyle(
+                                  color: KTradeTheme.primaryGreen,
+                                  fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -117,7 +129,8 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
             const SizedBox(height: 20),
 
             // Realtime FlChart
-            const Text('Graphique en temps réel', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text('Graphique en temps réel',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             Container(
               height: 220,
@@ -143,7 +156,8 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
                             dotData: const FlDotData(show: false),
                             belowBarData: BarAreaData(
                               show: true,
-                              color: KTradeTheme.primaryGreen.withOpacity(0.12),
+                              color:
+                                  KTradeTheme.primaryGreen.withOpacity(0.12),
                             ),
                           ),
                         ],
@@ -160,13 +174,17 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: KTradeTheme.primaryGreen,
                   foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: _isAnalyzing ? null : _runAiAnalysis,
                 icon: const Icon(Icons.auto_awesome),
                 label: Text(
-                  _isAnalyzing ? 'Analyse en cours par l\'IA...' : 'Demander l\'Avis de l\'IA 🧠',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  _isAnalyzing
+                      ? 'Analyse en cours par l\'IA...'
+                      : 'Demander l\'Avis de l\'IA 🧠',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
             ),
@@ -177,7 +195,8 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
                 color: KTradeTheme.cardBackground,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  side: const BorderSide(color: KTradeTheme.primaryGreen, width: 1),
+                  side: const BorderSide(
+                      color: KTradeTheme.primaryGreen, width: 1),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -189,18 +208,22 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
                         children: [
                           Text(
                             'Signal IA: ${_aiAnalysis!['signal']}',
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           Text(
                             'Confiance: ${_aiAnalysis!['confidence']}',
-                            style: const TextStyle(color: KTradeTheme.primaryGreen, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                                color: KTradeTheme.primaryGreen,
+                                fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
                       const Divider(height: 24, color: Colors.white24),
                       Text(
                         _aiAnalysis!['reason'],
-                        style: const TextStyle(color: Colors.white70, fontSize: 14),
+                        style: const TextStyle(
+                            color: Colors.white70, fontSize: 14),
                       ),
                       const SizedBox(height: 12),
                       Row(
@@ -208,11 +231,15 @@ class _RealtimeAiScreenState extends State<RealtimeAiScreen> {
                         children: [
                           Text(
                             'SL Suggeré: \$${_aiAnalysis!['suggestedSL'].toStringAsFixed(2)}',
-                            style: const TextStyle(color: KTradeTheme.lossRed, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                                color: KTradeTheme.lossRed,
+                                fontWeight: FontWeight.bold),
                           ),
                           Text(
                             'TP Suggeré: \$${_aiAnalysis!['suggestedTP'].toStringAsFixed(2)}',
-                            style: const TextStyle(color: KTradeTheme.primaryGreen, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                                color: KTradeTheme.primaryGreen,
+                                fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
